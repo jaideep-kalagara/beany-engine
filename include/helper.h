@@ -85,12 +85,12 @@ inline std::pair<wgpu::SurfaceTexture, wgpu::TextureView> getNextSurfaceViewData
     viewDescriptor.nextInChain = nullptr;
     viewDescriptor.label = toStringView("Surface texture view");
     viewDescriptor.format = static_cast<wgpu::Texture>(surfaceTexture.texture).getFormat();
-    viewDescriptor.dimension = WGPUTextureViewDimension_2D;
+    viewDescriptor.dimension = wgpu::TextureViewDimension::_2D;
     viewDescriptor.baseMipLevel = 0;
     viewDescriptor.mipLevelCount = 1;
     viewDescriptor.baseArrayLayer = 0;
     viewDescriptor.arrayLayerCount = 1;
-    viewDescriptor.aspect = WGPUTextureAspect_All;
+    viewDescriptor.aspect = wgpu::TextureAspect::All;
 
     wgpu::TextureView targetView = static_cast<wgpu::Texture>(surfaceTexture.texture).createView(viewDescriptor);
 

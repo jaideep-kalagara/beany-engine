@@ -96,14 +96,11 @@ void Application::mainLoop() {
         wgpu::CommandEncoderDescriptor encoderDesc = {};
         encoderDesc.nextInChain = nullptr;
         encoderDesc.label = toStringView("Encoder");
-
         wgpu::CommandEncoder encoder = device.createCommandEncoder(encoderDesc);
 
         wgpu::RenderPassColorAttachment renderPassColorAttachment = clearColorAttachment(targetView, { 1.0f, 0.0f, 0.0f, 1.0f });
 
         wgpu::RenderPassDescriptor renderPassDesc = {};
-        renderPassDesc.depthStencilAttachment = nullptr;
-        renderPassDesc.timestampWrites = nullptr;
         renderPassDesc.colorAttachmentCount = 1;
         renderPassDesc.colorAttachments = &renderPassColorAttachment;
 
