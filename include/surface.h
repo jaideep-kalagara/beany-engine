@@ -20,18 +20,17 @@
 #endif
 
 wgpu::Surface getSurface(GLFWwindow* window, wgpu::Instance& instance) {
-#if defined(_WIN32)
-    wgpu::SurfaceSourceWindowsHWND fromWindowHWND = {};
-    fromWindowHWND.hwnd = glfwGetWin32Window(window);
-    fromWindowHWND.hinstance = GetModuleHandle(NULL);
-    fromWindowHWND.chain.next = nullptr;
-    fromWindowHWND.chain.sType = wgpu::SType::SurfaceSourceWindowsHWND;
-
     wgpu::SurfaceDescriptor descriptor = {};
-    descriptor.nextInChain = &fromWindowHWND.chain;
     descriptor.label = {"Surface", 7};
 
-    return instance.createSurface(descriptor);
+#if defined(_WIN32)
+    wgpu::SurfaceSourceWindowsHWND source = {};
+    source.hwnd = glfwGetWin32Window(window);
+    source.hinstance = GetModuleHandle(nullptr);
+    source.chain.sType = wgpu::SType::SurfaceSourceWindowsHWND;
+    source.chain.next = nullptr;
+
+    descriptor.nextInChain = &source.chain;
 
 #elif defined(__APPLE__) && defined(__MACH__)
     NSWindow* nsWindow = glfwGetCocoaWindow(window);
@@ -41,30 +40,25 @@ wgpu::Surface getSurface(GLFWwindow* window, wgpu::Instance& instance) {
     [contentView setLayer:metalLayer];
     [contentView setWantsLayer:YES];
 
-    wgpu::SurfaceDescriptorFromMetalLayer metalDesc = {};
-    metalDesc.layer = metalLayer;
-    metalDesc.chain.sType = wgpu::SType::SurfaceDescriptorFromMetalLayer;
-    metalDesc.chain.next = nullptr;
+    wgpu::SurfaceSourceMetalLayer source = {};
+    source.layer = metalLayer;
+    source.chain.sType = wgpu::SType::SurfaceSourceMetalLayer;
+    source.chain.next = nullptr;
 
-    wgpu::SurfaceDescriptor descriptor = {};
-    descriptor.nextInChain = &metalDesc.chain;
-    descriptor.label = {"Surface", 7};
-
-    return instance.createSurface(descriptor);
+    descriptor.nextInChain = &source.chain;
 
 #elif defined(__linux__)
-    wgpu::SurfaceDescriptorFromXlibWindow xlibDesc = {};
-    xlibDesc.display = glfwGetX11Display();
-    xlibDesc.window = glfwGetX11Window(window);
-    xlibDesc.chain.sType = wgpu::SType::SurfaceDescriptorFromXlibWindow;
-    xlibDesc.chain.next = nullptr;
+    wgpu::SurfaceSourceXlibWindow source = {};
+    source.display = glfwGetX11Display();
+    source.window = glfwGetX11Window(window);
+    source.chain.sType = wgpu::SType::SurfaceSourceXlibWindow;
+    source.chain.next = nullptr;
 
-    wgpu::SurfaceDescriptor descriptor = {};
-    descriptor.nextInChain = &xlibDesc.chain;
-    descriptor.label = {"Surface", 7};
+    descriptor.nextInChain = &source.chain;
 
-    return instance.createSurface(descriptor);
 #else
     #error "Platform not supported"
 #endif
+
+    return instance.createSurface(descriptor);
 }
