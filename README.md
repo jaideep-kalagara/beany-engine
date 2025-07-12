@@ -23,7 +23,7 @@ git clone --recursive https://github.com/your-user/beany-renderer.git
 cd beany-renderer
 
 # Create build folder
-mkdir build && cd build
+mkdir build
 
 # Configure with MinGW
 cmake -B build -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
