@@ -18,8 +18,8 @@
 ## ⚙️ How to Build (with MinGW + CMake)
 
 ```bash
-# Clone recursively if using submodules (for WebGPU-Cpp)
-git clone --recursive https://github.com/your-user/beany-renderer.git
+# Clone git repo
+git clone https://github.com/jaideep-kalagara/beany-renderer.git
 cd beany-renderer
 
 # Create build folder
