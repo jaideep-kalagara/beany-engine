@@ -12,22 +12,7 @@
 - GLFW-based cross-platform windowing
 - Hardcoded triangle shader as a starting point
 - CMake-based build system
-
----
-
-## 🧱 Project Structure
-
-```
-.
-├── include/              # App-specific headers
-│   └── webgpu/           # WebGPU-Cpp headers (Élie Michel's wrapper)
-├── shaders/              # WGSL shader files
-├── src/                  # C++ source files
-├── third_party/          # Prebuilt WebGPU native libraries
-├── CMakeLists.txt        # Build configuration
-└── README.md
-```
-
+  
 ---
 
 ## ⚙️ How to Build (with MinGW + CMake)
@@ -41,7 +26,7 @@ cd beany-renderer
 mkdir build && cd build
 
 # Configure with MinGW
-cmake .. -G "MinGW Makefiles"
+cmake -B build -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++ -DCMAKE_C_COMPILER=gcc
 
 # Build
 cmake --build .
