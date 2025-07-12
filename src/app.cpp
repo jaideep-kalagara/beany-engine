@@ -88,7 +88,7 @@ bool Application::init() {
     // ----------------------------------------
     // Create Shader Module (WGSL)
     // ----------------------------------------
-    wgpu::ShaderModule triangleShader = createShaderModuleWGSL("shaders/triangle.wgsl", device);
+    wgpu::ShaderModule triangleShader = createShaderModuleWGSL("assets/shaders/triangle.wgsl", device);
 
     // ----------------------------------------
     // Get supported surface formats and create Render Pipeline

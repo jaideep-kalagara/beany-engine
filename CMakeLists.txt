@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(BeanyRenderer LANGUAGES CXX)
 
+set(CMAKE_C_COMPILER "gcc")
+set(CMAKE_CXX_COMPILER "g++")
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -24,10 +27,9 @@ add_executable(main ${SOURCES})
 
 add_custom_command(TARGET main POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/shaders
-    ${CMAKE_BINARY_DIR}/assets/shaders
+    ${CMAKE_SOURCE_DIR}/assets
+    ${CMAKE_BINARY_DIR}
 )
-
 # ---------------------------------------------
 # Include directories
 # ---------------------------------------------
