@@ -1,8 +1,8 @@
 #include <webgpu/webgpu-raii.hpp>
 #include <GLFW/glfw3.h>
 
-
 #include <iostream>
+#include <vector>
 
 #include "callbacks.h"
 #include "app.h"
@@ -12,40 +12,37 @@
 #include "pipeline.h"
 #include "shaders.h"
 
+// ---------------------------------------------------------
+// Initializes GPU vertex buffer with interleaved position/color data
+// ---------------------------------------------------------
 void Application::initializeBuffers() {
     std::vector<float> vertexData = {
-        // x0, y0, r, g, b
-        -0.5, -0.5, 1.0, 0.0, 0.0,
-
-        // x1, y1
-        +0.5, -0.5, 0.0, 1.0, 0.0,
-
-        // x2, y2
-        +0.0, +0.5, 0.0, 0.0, 1.0
+        // x, y,    r, g, b
+        -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Red
+         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Green
+         0.0f,  0.5f, 0.0f, 0.0f, 1.0f  // Blue
     };
 
-    size_t vertexCount = static_cast<uint32_t>(vertexData.size() / 5); // 5 floats per vertex
+    size_t bufferSize = vertexData.size() * sizeof(float);
 
     wgpu::BufferDescriptor bufferDesc;
-    bufferDesc.size = vertexData.size() * sizeof(float);
-    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex; // Vertex usage here!
+    bufferDesc.size = bufferSize;
+    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex;
     bufferDesc.mappedAtCreation = false;
-    vertexBuffer = device.createBuffer(bufferDesc);
 
-    queue.writeBuffer(vertexBuffer, 0, vertexData.data(), bufferDesc.size);
+    vertexBuffer = device.createBuffer(bufferDesc);
+    queue.writeBuffer(vertexBuffer, 0, vertexData.data(), bufferSize);
 }
 
-// Initializes the WebGPU application
+// ---------------------------------------------------------
+// Initializes GLFW, WebGPU instance, device, surface, pipeline
+// ---------------------------------------------------------
 bool Application::init() {
-    // ----------------------------------------
-    // Initialize GLFW
-    // ----------------------------------------
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW\n";
         return false;
     }
 
-    // Create a window without an OpenGL context (WebGPU only)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
     window = glfwCreateWindow(800, 600, "WebGPU Beany Renderer", nullptr, nullptr);
@@ -55,146 +52,89 @@ bool Application::init() {
         return false;
     }
 
-    // ----------------------------------------
-    // Create WebGPU Instance
-    // ----------------------------------------
     wgpu::Instance instance = wgpu::createInstance();
-
-    // ----------------------------------------
-    // Create Surface from the GLFW window
-    // ----------------------------------------
     surface = getSurface(window, instance);
     if (!surface) {
         std::cerr << "Failed to create surface\n";
         return false;
     }
 
-    // ----------------------------------------
-    // Request a compatible Adapter
-    // ----------------------------------------
     wgpu::Adapter adapter = getAdapter(instance, surface);
     if (!adapter) {
         std::cerr << "Failed to request adapter\n";
         return false;
     }
 
-    // Print selected GPU/device name
     wgpu::AdapterInfo adapterInfo;
     adapter.getInfo(&adapterInfo);
     std::cout << "Using device: " << adapterInfo.device.data << "\n";
 
-    // ----------------------------------------
-    // Request Logical Device from Adapter
-    // ----------------------------------------
     device = getDevice(adapter);
     if (!device) {
         std::cerr << "Failed to request device\n";
         return false;
     }
 
-    // ----------------------------------------
-    // Get Command Queue from Device
-    // ----------------------------------------
     queue = device.getQueue();
 
-    // ----------------------------------------
-    // Set up callback for when submitted work is done
-    // ----------------------------------------
-    wgpu::QueueWorkDoneCallbackInfo queueWorkDoneCallbackInfo = {};
-    queueWorkDoneCallbackInfo.callback = queueWorkDoneCallback;
-    queue.onSubmittedWorkDone(queueWorkDoneCallbackInfo);
+    wgpu::QueueWorkDoneCallbackInfo cbInfo = {};
+    cbInfo.callback = queueWorkDoneCallback;
+    queue.onSubmittedWorkDone(cbInfo);
 
-    // ----------------------------------------
-    // Configure Surface (swapchain settings)
-    // ----------------------------------------
     configureSurface(surface, adapter, device);
 
-    // ----------------------------------------
-    // Create Shader Module (WGSL)
-    // ----------------------------------------
     wgpu::ShaderModule triangleShader = createShaderModuleWGSL("assets/shaders/triangle.wgsl", device);
 
-    // ----------------------------------------
-    // Get supported surface formats and create Render Pipeline
-    // ----------------------------------------
     wgpu::SurfaceCapabilities capabilities;
     surface.getCapabilities(adapter, &capabilities);
     pipeline = createTrianglePipeline(device, capabilities.formats[0], triangleShader);
 
-
-    // ----------------------------------------
-    // Initialize buffers
-    // ----------------------------------------
     initializeBuffers();
-    
     return true;
 }
 
-// Main render loop
+// ---------------------------------------------------------
+// Runs the main rendering loop
+// ---------------------------------------------------------
 void Application::mainLoop() {
     while (!glfwWindowShouldClose(window)) {
-        // Exit loop if ESC is pressed
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
         }
 
-        // ----------------------------------------
-        // Acquire next surface texture to draw into
-        // ----------------------------------------
         auto [surfaceTexture, targetView] = getNextSurfaceViewData(surface);
         if (!targetView) break;
 
-        // ----------------------------------------
-        // Create Command Encoder
-        // ----------------------------------------
         wgpu::CommandEncoderDescriptor encoderDesc = {};
         encoderDesc.label = toStringView("Encoder");
         wgpu::CommandEncoder encoder = device.createCommandEncoder(encoderDesc);
 
+        wgpu::RenderPassColorAttachment colorAttachment = clearColorAttachment(targetView, { 0.0f, 0.0f, 0.0f, 1.0f });
+        wgpu::RenderPassDescriptor passDesc = { };
 
-        // ----------------------------------------
-        // Define Render Pass (clearing to red)
-        // ----------------------------------------
-        wgpu::RenderPassColorAttachment renderPassColorAttachment = 
-            clearColorAttachment(targetView, { 0.0f, 0.0f, 0.0f, 1.0f });
+        passDesc.colorAttachmentCount = 1;
+        passDesc.colorAttachments = &colorAttachment;
 
-        wgpu::RenderPassDescriptor renderPassDesc = {};
-        renderPassDesc.colorAttachmentCount = 1;
-        renderPassDesc.colorAttachments = &renderPassColorAttachment;
+        wgpu::RenderPassEncoder pass = encoder.beginRenderPass(passDesc);
+        pass.setPipeline(pipeline);
+        pass.setVertexBuffer(0, vertexBuffer, 0, vertexBuffer.getSize());
+        pass.draw(vertexBuffer.getSize() / sizeof(float) / 5, 1, 0, 0);
+        pass.end();
 
-        // ----------------------------------------
-        // Begin Render Pass
-        // ----------------------------------------
-        wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
-        renderPass.setPipeline(pipeline);
-        renderPass.setVertexBuffer(0, vertexBuffer, 0, vertexBuffer.getSize());
-        renderPass.draw(vertexBuffer.getSize() / sizeof(float) / 5, 1, 0, 0);
-
-
-        renderPass.end();
-
-        // ----------------------------------------
-        // Finish encoding and submit command buffer
-        // ----------------------------------------
         wgpu::CommandBuffer commands = encoder.finish();
         queue.submit(1, &commands);
-
-
-
-        // ----------------------------------------
-        // Present the drawn frame
-        // ----------------------------------------
         surface.present();
 
-        // Poll events and drive internal WebGPU state machine
         glfwPollEvents();
         device.poll(false, nullptr);
     }
 }
 
-// Cleanup on exit
+// ---------------------------------------------------------
+// Cleans up resources
+// ---------------------------------------------------------
 void Application::terminate() {
-    surface.unconfigure();           // Clean up surface swapchain
-    glfwDestroyWindow(window);       // Destroy window
-    glfwTerminate();                 // Terminate GLFW
+    surface.unconfigure();
+    glfwDestroyWindow(window);
+    glfwTerminate();
 }
