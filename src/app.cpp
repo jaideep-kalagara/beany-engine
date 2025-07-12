@@ -21,7 +21,7 @@ bool Application::init() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-    window = glfwCreateWindow(800, 600, "WebGPU Bean Renderer", nullptr, nullptr);
+    window = glfwCreateWindow(800, 600, "WebGPU Beany Renderer", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window\n";
         glfwTerminate();
