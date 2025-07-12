@@ -65,6 +65,18 @@ bool Application::init() {
         return false;
     }
 
+    // -------------------------------
+    // Create Queue
+    // -------------------------------
+    queue = device.getQueue();
+    
+    // -------------------------------
+    // Set quene work done callback
+    // -------------------------------
+    wgpu::QueueWorkDoneCallbackInfo queueWorkDoneCallbackInfo = {};
+    queueWorkDoneCallbackInfo.callback = queueWorkDoneCallback;
+    queue.onSubmittedWorkDone(queueWorkDoneCallbackInfo);
+
     // Configure surface
     configureSurface(surface, adapter, device);
 
@@ -89,7 +101,6 @@ void Application::mainLoop() {
 
         wgpu::RenderPassColorAttachment renderPassColorAttachment = clearColorAttachment(targetView, { 1.0f, 0.0f, 0.0f, 1.0f });
 
-
         wgpu::RenderPassDescriptor renderPassDesc = {};
         renderPassDesc.depthStencilAttachment = nullptr;
         renderPassDesc.timestampWrites = nullptr;
@@ -101,7 +112,7 @@ void Application::mainLoop() {
         renderPass.end();
 
         wgpu::CommandBuffer commands = encoder.finish();
-        device.getQueue().submit(1, &commands);
+        queue.submit(1, &commands);
 
         // Present surface
         surface.present();
@@ -113,6 +124,7 @@ void Application::mainLoop() {
 
 void Application::terminate() {
     surface.unconfigure();
+
     glfwDestroyWindow(window);
     glfwTerminate();
 }

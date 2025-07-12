@@ -11,4 +11,9 @@ void uncapturedErrorCallback(const WGPUDevice*, WGPUErrorType type, WGPUStringVi
         std::cerr << "Uncaptured error (type " << type << "): " << message.data << "\n";
 }
 
+// quene
+void queueWorkDoneCallback(WGPUQueueWorkDoneStatus status, void*, void*) {
+        std::cerr << "Queue work done (status " << status << ")\n";
+}
+
 #endif // CALLBACKS_H

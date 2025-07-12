@@ -16,6 +16,7 @@ private:
 
     // WebGPU resources
     wgpu::Device device;
+    wgpu::Queue queue;
     wgpu::Surface surface;
 };
 
