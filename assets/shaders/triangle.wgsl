@@ -1,17 +1,22 @@
+struct VertexInput {
+    @location(0) pos: vec2f,
+    @location(1) color: vec3f,
+};
+
+struct VertexOutput {
+    @builtin(position) position: vec4f,
+    @location(0) fragColor: vec3f,
+};
+
 @vertex
-fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4f {
-    var p = vec2f(0.0, 0.0);
-    if (in_vertex_index == 0u) {
-        p = vec2f(-0.5, -0.5);
-    } else if (in_vertex_index == 1u) {
-        p = vec2f(0.5, -0.5);
-    } else {
-        p = vec2f(0.0, 0.5);
-    }
-    return vec4f(p, 0.0, 1.0);
+fn vs_main(input: VertexInput) -> VertexOutput {
+    var output: VertexOutput;
+    output.position = vec4f(input.pos, 0.0, 1.0);
+    output.fragColor = input.color;
+    return output;
 }
 
 @fragment
-fn fs_main() -> @location(0) vec4f {
-    return vec4f(0.0, 0.4, 1.0, 1.0);
+fn fs_main(input: VertexOutput) -> @location(0) vec4f {
+    return vec4f(input.fragColor, 1.0);
 }

@@ -12,6 +12,29 @@
 #include "pipeline.h"
 #include "shaders.h"
 
+void Application::initializeBuffers() {
+    std::vector<float> vertexData = {
+        // x0, y0, r, g, b
+        -0.5, -0.5, 1.0, 0.0, 0.0,
+
+        // x1, y1
+        +0.5, -0.5, 0.0, 1.0, 0.0,
+
+        // x2, y2
+        +0.0, +0.5, 0.0, 0.0, 1.0
+    };
+
+    size_t vertexCount = static_cast<uint32_t>(vertexData.size() / 5); // 5 floats per vertex
+
+    wgpu::BufferDescriptor bufferDesc;
+    bufferDesc.size = vertexData.size() * sizeof(float);
+    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex; // Vertex usage here!
+    bufferDesc.mappedAtCreation = false;
+    vertexBuffer = device.createBuffer(bufferDesc);
+
+    queue.writeBuffer(vertexBuffer, 0, vertexData.data(), bufferDesc.size);
+}
+
 // Initializes the WebGPU application
 bool Application::init() {
     // ----------------------------------------
@@ -98,6 +121,12 @@ bool Application::init() {
     surface.getCapabilities(adapter, &capabilities);
     pipeline = createTrianglePipeline(device, capabilities.formats[0], triangleShader);
 
+
+    // ----------------------------------------
+    // Initialize buffers
+    // ----------------------------------------
+    initializeBuffers();
+    
     return true;
 }
 
@@ -127,7 +156,7 @@ void Application::mainLoop() {
         // Define Render Pass (clearing to red)
         // ----------------------------------------
         wgpu::RenderPassColorAttachment renderPassColorAttachment = 
-            clearColorAttachment(targetView, { 1.0f, 0.0f, 0.0f, 1.0f });
+            clearColorAttachment(targetView, { 0.0f, 0.0f, 0.0f, 1.0f });
 
         wgpu::RenderPassDescriptor renderPassDesc = {};
         renderPassDesc.colorAttachmentCount = 1;
@@ -138,7 +167,9 @@ void Application::mainLoop() {
         // ----------------------------------------
         wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
         renderPass.setPipeline(pipeline);
-        renderPass.draw(3, 1, 0, 0); // Draw single triangle
+        renderPass.setVertexBuffer(0, vertexBuffer, 0, vertexBuffer.getSize());
+        renderPass.draw(vertexBuffer.getSize() / sizeof(float) / 5, 1, 0, 0);
+
 
         renderPass.end();
 

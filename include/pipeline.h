@@ -26,9 +26,29 @@ wgpu::RenderPipeline createTrianglePipeline(wgpu::Device device, wgpu::TextureFo
     // Vertex Stage Configuration
     // ----------------------------------------
 
-    // No vertex buffers (hardcoded in shader)
-    pipelineDesc.vertex.bufferCount = 0;
-    pipelineDesc.vertex.buffers = nullptr;
+    
+    wgpu::VertexBufferLayout vertexBufferLayout = {};
+
+    wgpu::VertexAttribute attributes[2];
+    // position offset 0, 2 float (vec2f), loc: 0
+    attributes[0].shaderLocation = 0;
+    attributes[0].offset = 0;
+    attributes[0].format = wgpu::VertexFormat::Float32x2;
+
+    // color offset 2 * sizeof(float), 3 float (vec3f / rgb), loc: 1
+    attributes[1].shaderLocation = 1;
+    attributes[1].offset = 2 * sizeof(float);
+    attributes[1].format = wgpu::VertexFormat::Float32x3;
+
+    vertexBufferLayout.attributeCount = 2;
+    vertexBufferLayout.attributes = attributes;
+
+    vertexBufferLayout.arrayStride = (2 + 3) * sizeof(float); // 5 values, 2 for pos, 3 for color
+    vertexBufferLayout.stepMode = wgpu::VertexStepMode::Vertex; // one vertex per value 
+
+
+    pipelineDesc.vertex.bufferCount = 1;
+    pipelineDesc.vertex.buffers = &vertexBufferLayout;
 
     // Vertex shader module and entry point
     pipelineDesc.vertex.module = shader;

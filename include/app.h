@@ -19,6 +19,12 @@ private:
     wgpu::Device device;
     wgpu::Queue queue;
     wgpu::Surface surface;
+
+    // resources
+    wgpu::Buffer vertexBuffer;
+
+    // functions
+    void initializeBuffers();
 };
 
 #endif // APP_H

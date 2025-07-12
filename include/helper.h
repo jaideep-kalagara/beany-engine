@@ -6,6 +6,23 @@
 
 #include "callbacks.h"
 
+wgpu::Limits getRequiredLimits(wgpu::Adapter& adapter) {
+    wgpu::Limits supportedLimits = {};
+    adapter.getLimits(&supportedLimits);
+    
+    wgpu::Limits requiredLimits = wgpu::Default;
+
+    requiredLimits.maxVertexAttributes = 2;
+    requiredLimits.maxVertexBuffers = 1;
+    // requiredLimits.maxBufferSize = 6 * 2 * sizeof(float);
+    requiredLimits.maxVertexBufferArrayStride = 5 * sizeof(float);
+
+    requiredLimits.minUniformBufferOffsetAlignment = supportedLimits.minUniformBufferOffsetAlignment;
+    requiredLimits.minStorageBufferOffsetAlignment = supportedLimits.minStorageBufferOffsetAlignment;
+
+    return requiredLimits;
+}
+
 // Converts a std::string to wgpu::StringView
 inline wgpu::StringView toStringView(const std::string& str) {
     return wgpu::StringView(str.data());
@@ -38,6 +55,9 @@ wgpu::Device getDevice(wgpu::Adapter& adapter) {
 
     deviceDesc.defaultQueue.nextInChain = nullptr;
     deviceDesc.defaultQueue.label = toStringView("Default Queue");
+
+    wgpu::Limits requiredLimits = getRequiredLimits(adapter);
+    deviceDesc.requiredLimits = &requiredLimits;
 
     wgpu::Device device = adapter.requestDevice(deviceDesc);
     if (!device) {
