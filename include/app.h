@@ -15,6 +15,7 @@ private:
     GLFWwindow* window = nullptr;
 
     // WebGPU resources
+    wgpu::RenderPipeline pipeline;
     wgpu::Device device;
     wgpu::Queue queue;
     wgpu::Surface surface;
