@@ -87,4 +87,4 @@ Make sure your `shaders/` folder is copied to `out/assets/shaders/`.
 
 - Uses [`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html) in CMake to pull GLFW
 - WebGPU-Cpp is included as headers only
-- Backend is **Google’s Dawn** (via prebuilt `wgpu_native` binaries)
+- Backend is **wgpu-native**
