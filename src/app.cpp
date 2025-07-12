@@ -1,6 +1,7 @@
 #include <webgpu/webgpu-raii.hpp>
 #include <GLFW/glfw3.h>
 
+
 #include <iostream>
 
 #include "callbacks.h"
@@ -120,6 +121,7 @@ void Application::mainLoop() {
         wgpu::CommandEncoderDescriptor encoderDesc = {};
         encoderDesc.label = toStringView("Encoder");
         wgpu::CommandEncoder encoder = device.createCommandEncoder(encoderDesc);
+
 
         // ----------------------------------------
         // Define Render Pass (clearing to red)
