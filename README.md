@@ -87,8 +87,12 @@ Make sure your `shaders/` folder is copied to `out/assets/shaders/`.
 
 - Uses [`FetchContent`](https://cmake.org/cmake/help/latest/module/FetchContent.html) in CMake to pull GLFW
 - WebGPU-Cpp is included as headers only
+<<<<<<< HEAD
 ---
 
 ## 📜 License
 
 MIT — do what you want, just don't forget to give credit if you build something cool.
+=======
+- Backend is **wgpu-native**
+>>>>>>> 9501c28a1004b173ce570a2a1f01fe524eb877d9
