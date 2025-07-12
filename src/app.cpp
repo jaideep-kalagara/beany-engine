@@ -137,6 +137,7 @@ void Application::mainLoop() {
         wgpu::RenderPassEncoder renderPass = encoder.beginRenderPass(renderPassDesc);
         renderPass.setPipeline(pipeline);
         renderPass.draw(3, 1, 0, 0); // Draw single triangle
+
         renderPass.end();
 
         // ----------------------------------------
@@ -145,6 +146,8 @@ void Application::mainLoop() {
         wgpu::CommandBuffer commands = encoder.finish();
         queue.submit(1, &commands);
 
+
+
         // ----------------------------------------
         // Present the drawn frame
         // ----------------------------------------
@@ -152,7 +155,7 @@ void Application::mainLoop() {
 
         // Poll events and drive internal WebGPU state machine
         glfwPollEvents();
-        device.poll(true, nullptr);
+        device.poll(false, nullptr);
     }
 }
 

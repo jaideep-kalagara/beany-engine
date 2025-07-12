@@ -33,6 +33,7 @@ add_custom_command(TARGET main POST_BUILD
 target_include_directories(main PRIVATE
   include/webgpu   # Elie Michel's wrapper
   third_party/wgpu/include
+  third_party/imgui
   include          # Your own headers
 )
 
