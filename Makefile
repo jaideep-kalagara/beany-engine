@@ -13,7 +13,7 @@ endif
 #     # macOS-specific commands or settings
 #     CC = g++
 #     CFLAGS = -std=c++26 -Wall -D_MACOS -Iinclude -Llib
-# 	LIBFLAGS = -lglfw3 -lwgpu_native
+# 	  LIBFLAGS = -lglfw3 -lwgpu_native
 #     EXECUTABLE = out/main
 # endif
 
