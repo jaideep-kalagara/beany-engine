@@ -54,4 +54,5 @@ wgpu::ShaderModule createShaderModuleWGSL(const std::string& path, wgpu::Device 
     return device.createShaderModule(descriptor);
 }
 
+
 #endif // SHADERS_H
