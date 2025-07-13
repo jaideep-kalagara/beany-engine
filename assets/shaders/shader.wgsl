@@ -12,11 +12,9 @@ struct VertexOutput {
 fn vs_main(input: VertexInput) -> VertexOutput {
     var output: VertexOutput;
 
-    // Manually normalize from [0.0, 1.5] to [-1.0, 1.0]
-    let normalizedX = (input.pos.x / 1.5) * 2.0 - 1.0;
-    let normalizedY = (input.pos.y / 1.0) * 2.0 - 1.0;
+    let ratio = 800.0 / 600.0
 
-    output.position = vec4f(normalizedX, normalizedY, 0.0, 1.0);
+    output.position = vec4f(input.pos.x, input.pos.y * ratio, 0.0, 1.0);
     output.fragColor = input.color;
 
     return output;

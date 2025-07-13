@@ -51,7 +51,7 @@ if(WIN32)
   target_link_directories(main PRIVATE third_party/wgpu/lib/windows)
   target_link_libraries(main PRIVATE wgpu_native)
 
-  add_custom_command(TARGET main POST_BUILD
+  add_custom_command(TARGET main PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
       ${CMAKE_SOURCE_DIR}/third_party/wgpu/lib/windows/wgpu_native.dll
       $<TARGET_FILE_DIR:main>
