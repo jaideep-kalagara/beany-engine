@@ -10,28 +10,14 @@
 #include "renderer.h"
 #include "surface.h"
 #include "pipeline.h"
-#include "shaders.h"
+#include "resources.h"
 
 // ---------------------------------------------------------
 // Initializes GPU vertex buffer with interleaved position/color data
 // ---------------------------------------------------------
 void Application::initializeBuffers() {
-    std::vector<float> vertexData = {
-        // x, y,    r, g, b
-        -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, // Red
-         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // Green
-         0.0f,  0.5f, 0.0f, 0.0f, 1.0f  // Blue
-    };
 
-    size_t bufferSize = vertexData.size() * sizeof(float);
-
-    wgpu::BufferDescriptor bufferDesc;
-    bufferDesc.size = bufferSize;
-    bufferDesc.usage = wgpu::BufferUsage::CopyDst | wgpu::BufferUsage::Vertex;
-    bufferDesc.mappedAtCreation = false;
-
-    vertexBuffer = device.createBuffer(bufferDesc);
-    queue.writeBuffer(vertexBuffer, 0, vertexData.data(), bufferSize);
+    geometry = loadGeometry2D(RESOURCE_DIR "/shape.geo", device);
 }
 
 // ---------------------------------------------------------
@@ -78,12 +64,12 @@ bool Application::init() {
     queue = device.getQueue();
 
     wgpu::QueueWorkDoneCallbackInfo cbInfo = {};
-    cbInfo.callback = queueWorkDoneCallback;
+    cbInfo.callback = callbacks::quene::queueWorkDoneCallback;
     queue.onSubmittedWorkDone(cbInfo);
 
     configureSurface(surface, adapter, device);
 
-    wgpu::ShaderModule triangleShader = createShaderModuleWGSL("assets/shaders/triangle.wgsl", device);
+    wgpu::ShaderModule triangleShader = createShaderModuleWGSL(RESOURCE_DIR "/shaders/shader.wgsl", device);
 
     wgpu::SurfaceCapabilities capabilities;
     surface.getCapabilities(adapter, &capabilities);
@@ -117,8 +103,14 @@ void Application::mainLoop() {
 
         wgpu::RenderPassEncoder pass = encoder.beginRenderPass(passDesc);
         pass.setPipeline(pipeline);
-        pass.setVertexBuffer(0, vertexBuffer, 0, vertexBuffer.getSize());
-        pass.draw(vertexBuffer.getSize() / sizeof(float) / 5, 1, 0, 0);
+
+        // vertex buffer
+        pass.setVertexBuffer(0, geometry.points, 0, geometry.points.getSize());
+
+        // index buffer
+        pass.setIndexBuffer(geometry.indices, wgpu::IndexFormat::Uint16, 0, geometry.indices.getSize());
+
+        pass.drawIndexed(geometry.indices.getSize() / sizeof(uint16_t), 1, 0, 0, 0);
         pass.end();
 
         wgpu::CommandBuffer commands = encoder.finish();

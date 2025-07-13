@@ -41,6 +41,8 @@ target_include_directories(main PRIVATE
 # ---------------------------------------------
 target_link_libraries(main PRIVATE glfw)
 
+target_compile_definitions(main PRIVATE RESOURCE_DIR="${CMAKE_CURRENT_BINARY_DIR}/assets")
+
 # ---------------------------------------------
 # Link WebGPU native backend
 # ---------------------------------------------

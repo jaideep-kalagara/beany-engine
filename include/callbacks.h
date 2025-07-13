@@ -3,17 +3,25 @@
 
 #include <webgpu/webgpu-raii.hpp>
 
-void deviceLostCallback(const WGPUDevice*, WGPUDeviceLostReason reason, WGPUStringView message, void*, void*) {
-        std::cerr << "Device lost (reason " << reason << "): " << message.data << "\n";
-}
+namespace callbacks {
+        namespace device {
+                inline void deviceLostCallback(const WGPUDevice*, WGPUDeviceLostReason reason, WGPUStringView message, void*, void*) {
+                        std::cerr << "Device lost (reason " << reason << "): " << message.data << "\n";
+                }
 
-void uncapturedErrorCallback(const WGPUDevice*, WGPUErrorType type, WGPUStringView message, void*, void*) {
-        std::cerr << "Uncaptured error (type " << type << "): " << message.data << "\n";
-}
+                inline void uncapturedErrorCallback(const WGPUDevice*, WGPUErrorType type, WGPUStringView message, void*, void*) {
+                        std::cerr << "Uncaptured error (type " << type << "): " << message.data << "\n";
+                }
+        }
 
-// quene
-void queueWorkDoneCallback(WGPUQueueWorkDoneStatus status, void*, void*) {
-        std::cerr << "Queue work done (status " << status << ")\n";
+
+        // quene
+        namespace quene {
+                inline void queueWorkDoneCallback(WGPUQueueWorkDoneStatus status, void*, void*) {
+                        std::cerr << "Queue work done (status " << status << ")\n";
+                }
+        }
+
 }
 
 #endif // CALLBACKS_H

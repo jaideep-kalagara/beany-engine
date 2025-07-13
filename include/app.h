@@ -4,6 +4,8 @@
 #include <webgpu/webgpu-raii.hpp>
 #include <GLFW/glfw3.h>
 
+#include "helper.h"
+
 class Application {
 public:
     bool init();
@@ -21,7 +23,7 @@ private:
     wgpu::Surface surface;
 
     // resources
-    wgpu::Buffer vertexBuffer;
+    Geometry geometry;
 
     // functions
     void initializeBuffers();

@@ -6,7 +6,12 @@
 
 #include "callbacks.h"
 
-wgpu::Limits getRequiredLimits(wgpu::Adapter& adapter) {
+struct Geometry {
+    wgpu::Buffer points;
+    wgpu::Buffer indices;
+};
+
+static wgpu::Limits getRequiredLimits(wgpu::Adapter& adapter) {
     wgpu::Limits supportedLimits = {};
     adapter.getLimits(&supportedLimits);
     
@@ -14,8 +19,9 @@ wgpu::Limits getRequiredLimits(wgpu::Adapter& adapter) {
 
     requiredLimits.maxVertexAttributes = 2;
     requiredLimits.maxVertexBuffers = 1;
-    // requiredLimits.maxBufferSize = 6 * 2 * sizeof(float);
+    requiredLimits.maxBufferSize = (5 * sizeof(float)) * 15;
     requiredLimits.maxVertexBufferArrayStride = 5 * sizeof(float);
+    requiredLimits.maxInterStageShaderVariables = 3;
 
     requiredLimits.minUniformBufferOffsetAlignment = supportedLimits.minUniformBufferOffsetAlignment;
     requiredLimits.minStorageBufferOffsetAlignment = supportedLimits.minStorageBufferOffsetAlignment;
@@ -24,12 +30,12 @@ wgpu::Limits getRequiredLimits(wgpu::Adapter& adapter) {
 }
 
 // Converts a std::string to wgpu::StringView
-inline wgpu::StringView toStringView(const std::string& str) {
+static inline wgpu::StringView toStringView(const std::string& str) {
     return wgpu::StringView(str.data());
 }
 
 // get adapter
-wgpu::Adapter getAdapter(wgpu::Instance& instance, wgpu::Surface& surface) {
+static wgpu::Adapter getAdapter(wgpu::Instance& instance, wgpu::Surface& surface) {
     wgpu::RequestAdapterOptions adapterOpts;
     adapterOpts.nextInChain = nullptr;
     adapterOpts.powerPreference = wgpu::PowerPreference::HighPerformance;
@@ -45,13 +51,13 @@ wgpu::Adapter getAdapter(wgpu::Instance& instance, wgpu::Surface& surface) {
 }
 
 // get device
-wgpu::Device getDevice(wgpu::Adapter& adapter) {
+static wgpu::Device getDevice(wgpu::Adapter& adapter) {
     wgpu::DeviceDescriptor deviceDesc;
     deviceDesc.nextInChain = nullptr;
     deviceDesc.label = toStringView("Device");
 
-    deviceDesc.deviceLostCallbackInfo.callback = deviceLostCallback;
-    deviceDesc.uncapturedErrorCallbackInfo.callback = uncapturedErrorCallback;
+    deviceDesc.deviceLostCallbackInfo.callback = callbacks::device::deviceLostCallback;
+    deviceDesc.uncapturedErrorCallbackInfo.callback = callbacks::device::uncapturedErrorCallback;
 
     deviceDesc.defaultQueue.nextInChain = nullptr;
     deviceDesc.defaultQueue.label = toStringView("Default Queue");
@@ -69,7 +75,7 @@ wgpu::Device getDevice(wgpu::Adapter& adapter) {
 }
 
 // Configures the WebGPU surface with the provided adapter and device
-inline void configureSurface(wgpu::Surface& surface, wgpu::Adapter& adapter, wgpu::Device& device) {
+static inline void configureSurface(wgpu::Surface& surface, wgpu::Adapter& adapter, wgpu::Device& device) {
     wgpu::SurfaceConfiguration config = {};
     config.device = device;
     config.usage = wgpu::TextureUsage::RenderAttachment;
@@ -89,7 +95,7 @@ inline void configureSurface(wgpu::Surface& surface, wgpu::Adapter& adapter, wgp
 }
 
 // Get the next surface view data (frame)
-inline std::pair<wgpu::SurfaceTexture, wgpu::TextureView> getNextSurfaceViewData(wgpu::Surface& surface) {
+static inline std::pair<wgpu::SurfaceTexture, wgpu::TextureView> getNextSurfaceViewData(wgpu::Surface& surface) {
     wgpu::SurfaceTexture surfaceTexture;
 
     // Get current surface texture
