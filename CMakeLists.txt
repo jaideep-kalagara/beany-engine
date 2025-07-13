@@ -22,11 +22,7 @@ FetchContent_MakeAvailable(glfw)
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 add_executable(main ${SOURCES})
 
-add_custom_command(TARGET main POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/assets
-    ${CMAKE_BINARY_DIR}/assets
-)
+
 # ---------------------------------------------
 # Include directories
 # ---------------------------------------------
@@ -41,7 +37,7 @@ target_include_directories(main PRIVATE
 # ---------------------------------------------
 target_link_libraries(main PRIVATE glfw)
 
-target_compile_definitions(main PRIVATE RESOURCE_DIR="${CMAKE_CURRENT_BINARY_DIR}/assets")
+target_compile_definitions(main PRIVATE RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
 # ---------------------------------------------
 # Link WebGPU native backend
